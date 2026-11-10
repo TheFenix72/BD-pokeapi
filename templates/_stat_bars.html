@@ -1,0 +1,31 @@
+{% macro stat_bar(label, value) -%}
+    {% if value < 30 %}
+        {% set level = 'very-low' %}
+    {% elif value < 50 %}
+        {% set level = 'low' %}
+    {% elif value < 80 %}
+        {% set level = 'mid' %}
+    {% elif value <= 100 %}
+        {% set level = 'good' %}
+    {% elif value <= 130 %}
+        {% set level = 'high' %}
+    {% else %}
+        {% set level = 'elite' %}
+    {% endif %}
+    <div class="stat-row">
+        <span>{{ label }}</span>
+        <div class="stat-track">
+            <div class="stat-fill stat-{{ level }}" style="--stat: {{ value }}"></div>
+        </div>
+        <strong>{{ value }}</strong>
+    </div>
+{%- endmacro %}
+
+{% macro stat_block(stats) -%}
+    {{ stat_bar('HP', stats.hp | default(0)) }}
+    {{ stat_bar('ATK', stats.attack | default(0)) }}
+    {{ stat_bar('DEF', stats.defense | default(0)) }}
+    {{ stat_bar('SP.ATK', stats.special_attack | default(0)) }}
+    {{ stat_bar('SP.DEF', stats.special_defense | default(0)) }}
+    {{ stat_bar('VEL', stats.speed | default(0)) }}
+{%- endmacro %}

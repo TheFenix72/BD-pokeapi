@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Pokedex BD - MarcMC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pokedex BD - MarcMC</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Listado</a>
+            <a href="{{ url_for('create') }}">Crear Pokémon</a>
+            <a href="{{ url_for('search') }}">Búsquedas</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main class="stats-grid">
+        <section>
+            <h2>Promedio de ataque por tipo</h2>
+            <p>Pipeline: $unwind, $group, $avg, $sort</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Ataque promedio</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in average_attack %}
+                        <tr>
+                            <td><span class="type-pill type-{{ row._id }}">{{ row._id }}</span></td>
+                            <td>{{ "%.2f"|format(row.average_attack) }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Sin datos.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <h2>Cantidad de Pokémon por tipo</h2>
+            <p>Pipeline: $unwind, $group, $sum, $sort</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in count_by_type %}
+                        <tr>
+                            <td><span class="type-pill type-{{ row._id }}">{{ row._id }}</span></td>
+                            <td>{{ row.total }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="2">Sin datos.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+</body>
+</html>

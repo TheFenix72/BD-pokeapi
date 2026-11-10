@@ -1,0 +1,87 @@
+<!doctype html>
+{% from "_stat_bars.html" import stat_block %}
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Pokedex BD - MarcMC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pokedex BD - MarcMC</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Listado</a>
+            <a href="{{ url_for('create') }}">Crear Pokemon</a>
+            <a href="{{ url_for('search') }}">Busquedas</a>
+            <a href="{{ url_for('stats') }}">Estadisticas</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <section class="page-intro">
+            <h2>Listado de Pokemon</h2>
+            <p>Consulta rapida de sprites, tipos y estadisticas principales.</p>
+        </section>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Imagen</th>
+                    <th>No.</th>
+                    <th>Nombre</th>
+                    <th>Tipos</th>
+                    <th>Stats</th>
+                    <th>Legendario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in pokemon %}
+                    <tr>
+                        <td>
+                            {% if item.image %}
+                                <a href="{{ url_for('detail', pokemon_id=item._id) }}">
+                                    <img src="{{ item.image }}" alt="{{ item.name }}" class="sprite">
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td>{{ item.pokedex_number }}</td>
+                        <td class="pokemon-name">
+                            <a href="{{ url_for('detail', pokemon_id=item._id) }}">{{ item.name }}</a>
+                        </td>
+                        <td>
+                            {% for type in item.types %}
+                                <span class="type-pill type-{{ type }}">{{ type }}</span>
+                            {% endfor %}
+                        </td>
+                        <td class="stats-cell">
+                            {{ stat_block(item.stats) }}
+                        </td>
+                        <td>{{ 'Si' if item.is_legendary else 'No' }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('edit', pokemon_id=item._id) }}">Editar</a>
+                            <form method="post" action="{{ url_for('delete', pokemon_id=item._id) }}">
+                                <button class="danger-button" type="submit" onclick="return confirm('Eliminar este Pokemon?')">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="7">No hay Pokemon cargados. Ejecuta primero import_pokemon.py o crea uno manualmente.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

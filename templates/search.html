@@ -1,0 +1,130 @@
+<!doctype html>
+{% from "_stat_bars.html" import stat_block %}
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Pokedex BD - MarcMC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pokedex BD - MarcMC</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Listado</a>
+            <a href="{{ url_for('create') }}">Crear Pokemon</a>
+            <a href="{{ url_for('stats') }}">Estadisticas</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <section class="search-summary">
+            <h2>Filtros combinados</h2>
+            <p>Rellena varios campos y se aplicaran todos a la vez sobre MongoDB.</p>
+        </section>
+
+        <form method="get" class="search-panel combined-search">
+            <label>Texto en descripcion ($text)
+                <input type="text" name="q" value="{{ query }}" placeholder="Pokemon de tipo agua">
+            </label>
+
+            <label>Ataque mayor que ($gt)
+                <input type="number" name="min_attack" value="{{ min_attack }}" min="0" placeholder="80">
+            </label>
+
+            <label>Ataque menor que ($lt)
+                <input type="number" name="max_attack" value="{{ max_attack }}" min="0" placeholder="50">
+            </label>
+
+            <label>Defensa mayor que ($gt)
+                <input type="number" name="min_defense" value="{{ min_defense }}" min="0" placeholder="70">
+            </label>
+
+            <label>Tipos incluidos ($in)
+                <input type="text" name="types" value="{{ types_raw }}" placeholder="fuego, agua">
+            </label>
+
+            <label>Nombre por patron ($regex)
+                <input type="text" name="regex" value="{{ regex }}" placeholder="char">
+            </label>
+
+            <label>Altura menor que ($lt)
+                <input type="number" name="max_height" value="{{ max_height }}" min="0" placeholder="10">
+                <small>10 se interpreta como 1,0 m.</small>
+            </label>
+
+            <label>Altura mayor que ($gt)
+                <input type="number" name="min_height" value="{{ min_height }}" min="0" placeholder="12">
+                <small>12 se interpreta como 1,2 m.</small>
+            </label>
+
+            <label>Cantidad de tipos ($size)
+                <input type="number" name="types_count" value="{{ types_count }}" min="0" placeholder="2">
+            </label>
+
+            <label class="checkbox filter-checkbox">
+                <input type="checkbox" name="has_image" value="1" {% if has_image %}checked{% endif %}>
+                Solo con imagen ($exists)
+            </label>
+
+            <div class="filter-actions">
+                <button type="submit">Aplicar filtros</button>
+                <a href="{{ url_for('search') }}">Limpiar</a>
+            </div>
+        </form>
+
+        <section class="results-heading">
+            <h2>Resultados</h2>
+            {% if applied_filter %}
+                <p>{{ applied_filter }}</p>
+            {% endif %}
+        </section>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Nombre</th>
+                    <th>Tipos</th>
+                    <th>Stats</th>
+                    <th>Altura</th>
+                    <th>Descripcion</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in results %}
+                    <tr>
+                        <td>{{ item.pokedex_number }}</td>
+                        <td class="pokemon-name">
+                            <a href="{{ url_for('detail', pokemon_id=item._id) }}">{{ item.name }}</a>
+                        </td>
+                        <td>
+                            {% for type in item.types %}
+                                <span class="type-pill type-{{ type }}">{{ type }}</span>
+                            {% endfor %}
+                        </td>
+                        <td class="stats-cell">
+                            {{ stat_block(item.stats) }}
+                        </td>
+                        <td>{{ ("%.1f"|format((item.height | default(0)) / 10)) | replace('.', ',') }} m</td>
+                        <td>{{ item.description }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">No hay resultados para los filtros seleccionados.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>

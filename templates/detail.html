@@ -1,0 +1,163 @@
+<!doctype html>
+{% from "_stat_bars.html" import stat_block %}
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Pokedex BD - MarcMC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pokedex BD - MarcMC</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Listado</a>
+            <a href="{{ url_for('search') }}">Busquedas</a>
+            <a href="{{ url_for('edit', pokemon_id=pokemon._id) }}">Editar</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <section class="detail-card">
+            <div class="detail-image-panel">
+                {% if pokemon.image %}
+                    <img src="{{ pokemon.image }}" alt="{{ pokemon.name }}" class="detail-sprite">
+                {% endif %}
+                <p class="detail-number">No. {{ pokemon.pokedex_number }}</p>
+            </div>
+
+            <div class="detail-info">
+                <h2>{{ pokemon.name }}</h2>
+                <div class="detail-types">
+                    {% for type in pokemon.types %}
+                        <span class="type-pill type-{{ type }}">{{ type }}</span>
+                    {% endfor %}
+                </div>
+
+                <p class="detail-description">{{ pokemon.description }}</p>
+
+                <div class="detail-grid">
+                    <div>
+                        <span>Altura</span>
+                        <strong>{{ ("%.1f"|format((pokemon.height | default(0)) / 10)) | replace('.', ',') }} m</strong>
+                    </div>
+                    <div>
+                        <span>Peso</span>
+                        <strong>{{ ("%.1f"|format((pokemon.weight | default(0)) / 10)) | replace('.', ',') }} kg</strong>
+                    </div>
+                    <div>
+                        <span>Legendario</span>
+                        <strong>{{ 'Si' if pokemon.is_legendary else 'No' }}</strong>
+                    </div>
+                </div>
+
+                <h3>Estadisticas</h3>
+                <div class="detail-stats stats-cell">
+                    {{ stat_block(pokemon.stats) }}
+                </div>
+
+                <h3>Shiny</h3>
+                <div class="variant-panel">
+                    {% if pokemon.shiny_image %}
+                        <img src="{{ pokemon.shiny_image }}" alt="{{ pokemon.name }} shiny" class="variant-sprite">
+                        <span>Version shiny</span>
+                    {% else %}
+                        <span>No hay sprite shiny registrado.</span>
+                    {% endif %}
+                </div>
+
+                <h3>Evoluciones</h3>
+                <div class="evolution-section">
+                    <div class="evolution-cards">
+                        {% for evolution in pokemon.evolution_details %}
+                            <div class="evolution-card {% if evolution.name == pokemon.name %}current-evolution{% endif %}">
+                                {% if evolution.pokemon_id %}
+                                    <a href="{{ url_for('detail', pokemon_id=evolution.pokemon_id) }}">
+                                        {% if evolution.image %}
+                                            <img src="{{ evolution.image }}" alt="{{ evolution.name }}">
+                                        {% endif %}
+                                        <span>{{ evolution.name }}</span>
+                                    </a>
+                                {% else %}
+                                    {% if evolution.image %}
+                                        <img src="{{ evolution.image }}" alt="{{ evolution.name }}">
+                                    {% endif %}
+                                    <span>{{ evolution.name }}</span>
+                                {% endif %}
+                                <small>{{ evolution.method }}</small>
+                            </div>
+                        {% else %}
+                            <p>Sin linea evolutiva registrada.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h3>Mega evoluciones</h3>
+                <div class="mega-grid">
+                    {% for mega in pokemon.mega_evolutions %}
+                        <div class="mega-card">
+                            {% if mega.image %}
+                                <img src="{{ mega.image }}" alt="{{ mega.name }}">
+                            {% endif %}
+                            <strong>{{ mega.name }}</strong>
+                            {% if mega.shiny_image %}
+                                <img src="{{ mega.shiny_image }}" alt="{{ mega.name }} shiny">
+                                <small>Shiny</small>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <span>No tiene megaevolucion registrada en PokeAPI.</span>
+                    {% endfor %}
+                </div>
+
+                <h3>Localizacion</h3>
+                <div class="abilities-list">
+                    {% for location in pokemon.locations %}
+                        <span>{{ location }}</span>
+                    {% else %}
+                        <span>No hay rutas registradas en PokeAPI.</span>
+                    {% endfor %}
+                </div>
+
+                <h3>Relaciones de tipo</h3>
+                <div class="type-relations">
+                    <div>
+                        <h4>Debilidades</h4>
+                        {% for type in pokemon.weaknesses %}
+                            <span class="type-pill type-{{ type }}">{{ type }}</span>
+                        {% else %}
+                            <span>Ninguna registrada</span>
+                        {% endfor %}
+                    </div>
+                    <div>
+                        <h4>Fortalezas</h4>
+                        {% for type in pokemon.strengths %}
+                            <span class="type-pill type-{{ type }}">{{ type }}</span>
+                        {% else %}
+                            <span>Ninguna registrada</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <h3>Habilidades</h3>
+                <div class="abilities-list">
+                    {% for ability in pokemon.abilities %}
+                        <span>{{ ability }}</span>
+                    {% else %}
+                        <span>Sin habilidades registradas</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

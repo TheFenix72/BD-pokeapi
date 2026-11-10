@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Pokedex BD - MarcMC</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Pokedex BD - MarcMC</h1>
+        <nav>
+            <a href="{{ url_for('index') }}">Listado</a>
+            <a href="{{ url_for('create') }}">Crear Pokémon</a>
+            <a href="{{ url_for('search') }}">Búsquedas</a>
+            <a href="{{ url_for('stats') }}">Estadísticas</a>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <section class="messages">
+                {% for category, message in messages %}
+                    <p class="{{ category }}">{{ message }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        <form method="post" class="form-grid" enctype="multipart/form-data">
+            <label>Nombre
+                <input type="text" name="name" value="{{ form.get('name', '') }}" required>
+            </label>
+            <label>Número Pokédex
+                <input type="number" name="pokedex_number" value="{{ form.get('pokedex_number', '') }}" min="1" required>
+            </label>
+            <label>Tipos separados por coma
+                <input type="text" name="types" value="{{ form.get('types', []) | join(', ') if form.get('types') is not string else form.get('types') }}" required>
+            </label>
+            <label>Habilidades separadas por coma
+                <input type="text" name="abilities" value="{{ form.get('abilities', []) | join(', ') if form.get('abilities') is not string else form.get('abilities') }}">
+            </label>
+            <label>HP
+                <input type="number" name="hp" value="{{ form.get('stats', {}).get('hp', form.get('hp', 0)) }}" min="0" required>
+            </label>
+            <label>Ataque
+                <input type="number" name="attack" value="{{ form.get('stats', {}).get('attack', form.get('attack', 0)) }}" min="0" required>
+            </label>
+            <label>Defensa
+                <input type="number" name="defense" value="{{ form.get('stats', {}).get('defense', form.get('defense', 0)) }}" min="0" required>
+            </label>
+            <label>Ataque especial
+                <input type="number" name="special_attack" value="{{ form.get('stats', {}).get('special_attack', form.get('special_attack', 0)) }}" min="0" required>
+            </label>
+            <label>Defensa especial
+                <input type="number" name="special_defense" value="{{ form.get('stats', {}).get('special_defense', form.get('special_defense', 0)) }}" min="0" required>
+            </label>
+            <label>Velocidad
+                <input type="number" name="speed" value="{{ form.get('stats', {}).get('speed', form.get('speed', 0)) }}" min="0" required>
+            </label>
+            <label>Altura
+                <input type="number" name="height" value="{{ form.get('height', 0) }}" min="0" required>
+                <small>Se muestra con coma automatica: 10 = 1,0 m.</small>
+            </label>
+            <label>Peso
+                <input type="number" name="weight" value="{{ form.get('weight', 0) }}" min="0" required>
+                <small>Se muestra con coma automatica: 10 = 1,0 kg.</small>
+            </label>
+            <label>URL de imagen
+                <input type="url" name="image" value="{{ form.get('image', '') }}">
+            </label>
+            <label>Imagen desde carpeta
+                <input type="file" name="image_file" accept="image/png,image/jpeg,image/gif,image/webp">
+            </label>
+            <label>URL sprite shiny
+                <input type="url" name="shiny_image" value="{{ form.get('shiny_image', '') }}">
+            </label>
+            <label>Sprite shiny desde carpeta
+                <input type="file" name="shiny_image_file" accept="image/png,image/jpeg,image/gif,image/webp">
+            </label>
+            {% set first_mega = form.get('mega_evolutions', [{}])[0] if form.get('mega_evolutions') and form.get('mega_evolutions') is not string else {} %}
+            <label>Nombre megaevolucion
+                <input type="text" name="mega_name" value="{{ first_mega.get('name', '') }}" placeholder="nombre-mega">
+            </label>
+            <label>URL sprite megaevolucion
+                <input type="url" name="mega_image" value="{{ first_mega.get('image', '') }}">
+            </label>
+            <label>URL shiny megaevolucion
+                <input type="url" name="mega_shiny_image" value="{{ first_mega.get('shiny_image', '') }}">
+            </label>
+            <label>Donde se puede encontrar
+                <input type="text" name="locations" value="{{ form.get('locations', []) | join(', ') if form.get('locations') is not string else form.get('locations') }}" placeholder="ruta 1, cueva ejemplo">
+            </label>
+            <label>Debilidades
+                <input type="text" name="weaknesses" value="{{ form.get('weaknesses', []) | join(', ') if form.get('weaknesses') is not string else form.get('weaknesses') }}" placeholder="agua, roca">
+            </label>
+            <label>Fortalezas
+                <input type="text" name="strengths" value="{{ form.get('strengths', []) | join(', ') if form.get('strengths') is not string else form.get('strengths') }}" placeholder="planta, bicho">
+            </label>
+            <label class="checkbox">
+                <input type="checkbox" name="is_legendary" {% if form.get('is_legendary') %}checked{% endif %}>
+                Legendario
+            </label>
+            <label class="full">Descripción
+                <textarea name="description" rows="4" required>{{ form.get('description', '') }}</textarea>
+            </label>
+            <button type="submit">Guardar cambios</button>
+        </form>
+    </main>
+</body>
+</html>
